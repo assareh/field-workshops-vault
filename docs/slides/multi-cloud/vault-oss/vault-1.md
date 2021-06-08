@@ -138,7 +138,7 @@ So when we think about what we get out of identity based security right, we now 
 name: secrets-engines
 layout: false
 # Vault Secrets Engines
-.center[![:scale 60%](images/vault-engines.png)]
+.center[![:scale 80%](images/vault-engines.png)]
 .center[[Vault Secrets Engines](https://www.vaultproject.io/docs/secrets/)]
 
 ???
