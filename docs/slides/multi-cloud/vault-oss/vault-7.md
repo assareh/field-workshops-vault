@@ -3,7 +3,7 @@ class: title, shelf, no-footer, fullbleed
 background-image: url(https://hashicorp.github.io/field-workshops-assets/assets/bkgs/HashiCorp-Title-bkg.jpeg)
 count: false
 
-# Chapter 7    
+# Chapter 7
 ## Dynamic Database Secrets
 
 ![:scale 15%](https://hashicorp.github.io/field-workshops-assets/assets/logos/logo_vault.png)
@@ -159,7 +159,7 @@ class:compact
 # Generating Database Credentials
 #### Run this command to generate actual credentials for the MySQL database against the role that was configured on the previous slide:
 ```bash
-vault read lob_a/workshop/database/creds/workshop-app-long  
+vault read lob_a/workshop/database/creds/workshop-app-long
 ```
 #### This should return something like:<br>
 ```bash
@@ -181,7 +181,7 @@ class:compact
 # Renewing and Revoking Database Credentials
 #### Run this command to renew credentials, replacing `<lease_id>` with the right lease_id:
 ```bash
-vault write sys/leases/renew lease_id="<lease_id>" increment="120"  
+vault write sys/leases/renew lease_id="<lease_id>" increment="120"
 ```
 #### Run this command to revoke credentials, replacing `<lease_id>` with the right lease_id:
 ```bash

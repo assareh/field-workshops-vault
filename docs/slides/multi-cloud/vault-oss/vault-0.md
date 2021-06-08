@@ -9,10 +9,11 @@ count: false
 ![:scale 15%](https://hashicorp.github.io/field-workshops-assets/assets/logos/logo_vault.png)
 
 ???
-This workshop introduces students to Vault.
+Welcome to Intro to Vault! My name is Andy Assareh, I am a Solutions Engineer at HashiCorp, and I will be your primary guide through the workshop today.
 
-It is cloud agnostic.
+We also have a fantastic group of Hashicorporeals and Dadgarians here that will be assisting as your lab TAs as well so let’s all give a fist pump for that.
 
+Well we have a lot to cover today, so let's get right down to it.
 ---
 layout: true
 
@@ -31,7 +32,7 @@ https://hashicorp.github.io/field-workshops-vault/slides/multi-cloud/vault-oss/i
 
 ???
 
-The link to this slide deck
+The first question we usually hear during these workshops is "Can we have the slide deck?" The answer is YES, and we've made it really easy to download. In fact, it's just a website. Open this link and you can follow along on your own laptop. Just use the arrow keys to navigate.
 
 ---
 name: Introductions
@@ -43,9 +44,13 @@ name: Introductions
 * Favorite Text Editor
 
 ???
-* Use this slide to introduce yourself, give a little bit of your background story, then go around the room and have all your participants introduce themselves.
+**Let's start with introductions. Give us your name, job title, any secrets management experience, and finally your favorite text editor. There are no wrong answers here. Except for Notepad. Notepad++ is ok though.**
 
-* The favorite text editor question is a good ice breaker, but perhaps more importantly it gives you an immediate gauge of how technical your users are.  
+If your audience is less than 25 people you can quickly go through the room and ask everyone to introduce themselves. The text editor question is a fun ice breaker, and it also gives you a quick barometer on how technical your students are.
+
+**Rest assured you don't need to be an expert at vi to use Vault.**
+
+Now introduce yourself, tell a story, give the audience something to think about.
 
 ---
 name: Table-of-Contents
@@ -61,7 +66,7 @@ name: Table-of-Contents
 1. Encryption as a Service
 
 ???
-The table of contents for the workshop
+Here is our agenda for today's training. The format is simple, you'll hear a lecture and view slides on each topic, then participate in a hands-on lab about that topic. We'll alternate between lecture and lab to keep things interesting. We'll start with an introduction to Vault, then work our way through some key concepts, ending with some more advanced use cases. We will have time for questions at the end. The workshop should take roughly three hours to complete. We will have a short break after the first lab, which should be around 11.
 
 ---
 name: instruqt-tracks
@@ -75,3 +80,8 @@ name: instruqt-tracks
 * We'll cover chapters 1-6 and then do the first lab.
 * We'll then cover chapter 7 with the second lab.
 * We'll finish with chapter 8 and the third lab.
+
+???
+All you'll need to participate in the hands-on labs is a web browser.
+
+One thing to note regarding corporate VPNs- we have had reports of issues with the labs when connected to a corporate VPN. If you are on a VPN and do experience issues, please try disconnecting from the VPN.

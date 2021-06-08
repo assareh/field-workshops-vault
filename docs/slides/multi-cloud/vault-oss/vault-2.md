@@ -5,7 +5,7 @@ count: false
 
 
 
-# Chapter 2      
+# Chapter 2
 ## Interacting With Vault
 
 ![:scale 15%](https://hashicorp.github.io/field-workshops-assets/assets/logos/logo_vault.png)
