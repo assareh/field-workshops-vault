@@ -43,6 +43,8 @@ name: Vault-CLI
 
 ???
 * The Vault CLI is distributed as a Go binary.
+* The same binary provides the Vault server, a Vault client, Vault agent.
+* There is a slightly different binary for Vault Enterprise which includes additional components, and requires a license file from HashiCorp
 * It runs on multiple operating systems.
 
 ---
@@ -80,7 +82,7 @@ Vault servers can be run in two different modes:
 * "Prod" mode that can be used in QA and production
 
 ???
-* Discuss Vault's two server modes
+* Discuss Vault's two server modes -- clarify that dev means Vault practice and development. NOT your team's dev environment
 
 ---
 name: vault-dev-server
@@ -102,12 +104,12 @@ name: Vault-UI
 * In order to use the Vault UI, you must sign in.
 * Vault supports multiple authentication methods.
 * A new Vault server will only have the Token auth method enabled.
-* In the challenge you just completed, you used the Token auth method and specified "root" as the token.
 
 ???
 
 * Let's talk about the Vault UI a bit, including ways of signing into it.
-* While you used the token "root" in the last challenge, you'll be running a Vault server in "Prod"  mode in the rest of the track and will have to use the token generated when you initialize that server in the next challenge.
+* In production you'll almost certainly want to enable and use a more user oriented auth method such as LDAP, Active Directory, or Okta for example. And typically this will be the same as or connected with your organization's single sign on system.
+
 ---
 name: signing-into-the-vault-ui
 # Signing into the Vault UI

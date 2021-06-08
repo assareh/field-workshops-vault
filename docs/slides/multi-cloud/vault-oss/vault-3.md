@@ -31,6 +31,8 @@ name: vault-production-serves
 
 ???
 * Describe the steps to run a production Vault server.
+* We should be running a cluster for high availability resilience to node failures, so we'll do this on multiple servers.
+* We'll probably use something like systemd on Linux to run Vault as a service that starts up when the system is booted.
 
 ---
 name: configuring-vault
@@ -47,6 +49,7 @@ name: configuring-vault
 
 ???
 * Discuss Vault configuration files and common settings.
+storage and listener probably your minimum
 
 ---
 name: running-vault
@@ -56,6 +59,7 @@ name: running-vault
 
 ???
 * Describe the command to run a Vault production server.
+use the -config to specify path to vault config or folder containing it
 
 ---
 name: initializing-vault
@@ -68,6 +72,15 @@ name: initializing-vault
 
 ???
 * Describe Vault's `init` command
+* This command creates the cryptographic barrier. Can't be precreated because it must be unique to the system.
+
+Academically how this all works is very interesting, though in production it's a giant pain. Because what we're doing is we're trying to see how can I generate trust in a place where I have no trust, I don't trust the system i'm running on. and I don't trust the people that i'm working with. now how do I have a system that's a security system that's about trust when I don't have any of that.
+
+We use what's called Shamir's secret sharing in order to solve that which I think is academically super interesting. Basically, what we do is we take points off of a polynomial. so by default we're using five points with a threshold of three. We think about a line segment. for me to solve the equation of that line I need any two points in that line.
+
+But for me to solve the equation of a parabola (hello school algebra) I need any three points on that parabola. so basically what we're doing is taking an arbitrary parabola, and we're picking five points off that parabola, and then we're going to give one point each to five five different people.
+
+and if any three of those come back and enter in their shard, or key share, we're able to solve for the original equation of the parabola and regenerate the master key which allows us to decrypt the encryption key.
 
 ---
 name: unsealing-vault
@@ -78,6 +91,12 @@ name: unsealing-vault
 
 ???
 * Describe Vault's `unseal` command.
+because we can't write the master key anywhere, that could compromise all of vault.
+so that's why we split it up to multiple people that i'm going to trust
+one person might be a bad actor, but it's much less likely that three different people are going to behave badly at the same time in collaboration with each other.
+Not a perfect system but certainly better than trusting a single person.
+Of course, the problem is, if the server restarts now it's two in the morning and I not only need to go find one person to go get us fix and I need to go find three people so I can get the thing back up and running.
+And if i'm running multiple servers in that cluster I need to do this for every single one of those servers because i can't share the master key or the encryption key between the servers, it needs to be kept secure.
 
 ---
 name: vault-status-command
