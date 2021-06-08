@@ -31,6 +31,12 @@ name: dynamic-database-secrets
 * Vault manages the lifecycle of these credentials, automatically deleting them from the database when the TTL expires.
 
 ???
+These are commonly long lived when configured manually which generally presents a security challenge, in that these credentials if exposed there's no way to tell when they got them. it could have been months ago, it could have been out of a backup, or could have been a former employee was able to find them and months later decided to use them. all this just generates exposure. by using dynamically generated short lived credentials for everything, but particularly databases, we're able to minimize that exposure.
+
+The great thing with the way vault is configured is you can configure the TTL as a measure from security team, so instead of the security team telling the application teams or the infrastructure teams hey I need you to rotate these passwords every 30 days and tell me you did it, they can be like hey I need you to use vault to access your credentials and then i'm going to write the policy that says how long these credentials are good for.
+
+And now I know it's going to be enforced because vaults can enforce it and that's the only way you're gonna get your credentials. And because we, the way by design what we tend to do is always generate new credentials and overlap the lifetime of which those credentials are good, that means we can constantly be doing this in the middle of the day in production without the threat of taking workloads down and have that confidence that we can do this very regularly without causing issues.
+
 * Vault's Database secrets engine supports dynamic generation of short-lived credentials (usernames and passwords) for databases.
 * This avoids storing long-lived or permanent credentials on app servers that can easily be compromised.
 * Short-lived credentials are much more secure since ex-employees and others are very unlikely to know the current values.
@@ -51,7 +57,7 @@ name: database-engine-plugins
 ???
 * The database secrets engine has out-of-the-box plugins for many databases.
 * Custom plugins can also be built.
-
+Works great with RDS in AWS
 ---
 name: database-engine-workflow
 # Database Secrets Engine Workflow
@@ -63,12 +69,15 @@ name: database-engine-workflow
 1. If credentials are compromised, you can revoke them immediately.
 
 ???
-* This slide lays out the basic workflow used for all of the Datbase secrets engine plugins.
-* All of the plugins work the same basic way.
-* A service account with permissions to manage users on the database server is required by each connection.
-* User creation and revocation SQL statements are specified for roles to determine the permissions og generated users within various databases.
-* Multiple connections and roles can be created for a single secrets engine instance to support connecting to multiple database servers with different levels of access.
-* The TTL settings can be tuned to suit your needs.
+2 Vault needs creds with permission to create other creds.
+least privilege on the vault service account (just permissions to create and delete users and assign them access)
+Rotate root (that way you can ensure that, even though a human being, had to create the first credential and give it the vault that human being can't use that anymore because it's been rotated)
+
+4 vault generates creds on demand, expire on TTL
+  default TTL say 1h, max TTL say 24h
+  why because it's easier job to extend credentials instead of revoking
+
+6 can revoke for a single cred, or broadly, every credential ever created for this database, or every credential older than x hours
 
 ---
 name: sample-web-app
@@ -131,7 +140,7 @@ class: compact
 #### 3. If you don't want to use `'%'` as the host for the user, you can specify `root_rotation_statements` when writing to the path `<database>/config/<connection>`; for instance, you could set this to `"ALTER USER '{{username}}'@'localhost' IDENTIFIED BY '{{password}}';"`.
 
 ???
-* We want to give some advice about rotating root credentials for the database secrets engine when using MySQL.
+* Definitely make sure you rotate this password because otherwise we don't have the confidence that every user that was created with it was done by vault and logged in the audit log.
 
 ---
 class:compact
@@ -148,6 +157,7 @@ vault write lob_a/workshop/database/roles/workshop-app-long \
 #### This defines a role against the "wsmysqldatabase" connection which generates credentials with an initial TTL of 1 hour. But their lifetime can be extended up to 24 hours.
 
 ???
+Different roles for different apps or users, different access
 * We specified a number of things:
     * The creation statements that define the capabilities of the userd that are created
     * The default time to live for generated users
