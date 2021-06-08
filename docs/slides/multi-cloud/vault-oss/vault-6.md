@@ -29,6 +29,9 @@ name: vault-policies
 * In addition to specifying paths, policies also specify a set of capabilities for those paths.
 * Policies are written in HashiCorp Configuration Language (HCL).
 
+???
+if you're familiar with terraform it's a similar syntax
+
 ---
 name: vault-policy-example
 # A Vault Policy Example
@@ -43,6 +46,8 @@ path "auth/token/lookup-self" {
 ???
 * This policy allows tokens to look up their own properties
 
+allows you to see who you are, or at least who vault thinks you are mua ha ha ha evil
+
 ---
 name: vault-policy-paths-capabilities
 # Policy Paths and Capabilities
@@ -54,6 +59,10 @@ name: vault-policy-paths-capabilities
 
 ???
 * Explain policy paths and capabilities
+
+explicit deny is there if you want to be certain that somebody can't write a policy that's going to accidentally grant access to something they shouldn't
+
+sudo is another interesting one, when we first configure vault we have a root token which we authenticate with. but that root token is not something that we want to use long term. it's too powerful and must be destroyed.. So we're going to use something like user pass or some other method to grant access to users who are not root users, but I still need to have administrators in here. And so we can have these people who don't have access to the root policy gain access to things that generally only the root policy would do like granting sudo permissions, and so basically just allows them to get access to the special areas.
 
 ---
 name: policies-for-lobs
@@ -72,6 +81,12 @@ path "lob_a/dept_1/*" {
 ???
 * Talk about how many organizations organize Vault secrets by line of business and department.
 * Explain the policy including the glob character and that it can only be used at the end of a path.
+
+You can use HEREDOC format to pass in the policy directly without saving it to a file first, but generally in production, what i'd recommend is keeping all these policies in version control because you're going to want to ultimately be able to recreate and preferably version them as they change over time.
+
+and i've seen where people have used pipelines in order to push all these policies from a git repository into vault so that they know exactly who made changes and when they made them in git in addition to the fact that you'll see this in the vault audit logs as well.
+
+similarly there's a terraform provider for configuring vault that is becoming an inceasingly popular way to do this as well, because then you have the configuration captured as code.
 
 ---
 name: vault-policy-commands
