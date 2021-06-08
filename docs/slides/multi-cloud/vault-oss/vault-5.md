@@ -28,6 +28,12 @@ name: vault-auth-methods
 .center[Vault supports many different authentication methods.]
 
 ???
+Vault supports many different authentication methods just like we support many different secrets engines.
+
+I'm really trying to find what is the best possible way for me to authenticate this workload, and usually it's what's going to give me the most confidence that this workload is who it says it is, or this user is who they say they are. the user ones are pretty straightforward right it's wherever your directory service is that you use to authenticate people and we'll usually just tie that into vault.
+
+ideally maybe something like okta that has two factor authentication out of the box, we can tie it all together. If you use AD we can use LDAP, or if you want to make everyone use their github account, we can do that, whatever it is.
+
 * Auth methods are how your apps and users verify their identity.
 * In the same way you might present some kind of valid ID at the hotel check-in desk, users and apps provide some kind of credential or token to authenticate.
 * You can enable multiple auth methods and multiple instances of the same auth method.
@@ -58,6 +64,14 @@ name:vault-auth-methods-2
 </div>
 
 ???
+the application methods are usually the ones that are more interesting to think about. cloud, k8s
+if we're on prem we may not have those, but we have another solution called approle which can solve this as well.
+in general though we'll want to use the mechanism native to that platform if one is available.
+
+approle is really cool in that again we're thinking about how can we generate security when we don't actually trust any one particular thing. and so with approle we created a construct where like hey maybe you're using VRA provisioning and then you're using chef configuration management, well, let me pass an encrypted APP ID through VRA. and then i'll send the role ID via chef. i'm gonna assume that somebody is not going to simultaneously compromise both of those systems in order to compromise approle.
+
+we're able to combine these two things together, generate one time tokens so that I can then create a long lived token to authenticate to vault in a secure fashion, where neither of the orchestration methods that actually got me those credentials were able to compromise unless somebody could compromise the whole system together.
+
 * Userpass - Allows users to authenticate with username and password managed by Vault
 * GitHub - Allows users to authenticate with their GitHub personal access tokens
 * LDAP - Allows users to authenticate against an LDAP server with their username and password managed by that server.

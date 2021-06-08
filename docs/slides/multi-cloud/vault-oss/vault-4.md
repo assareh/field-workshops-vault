@@ -34,6 +34,8 @@ name: vault-secrets-engines-1
 * Others can dynamically generate secrets such as database and cloud credentials.
 * There is even one called "Transit" that provides encryption as a service.
 
+* Pluggable. For example we have someone that wrote an Ethereum plugin for Vault to safeguard their cryptocurrency private keys. to use Vault as a highly secure Ethereum Wallet with MFA.
+
 ---
 name:vault-secrets-engines-2
 # Important Vault Secrets Engines
@@ -82,13 +84,12 @@ name: vault-kv-engine
 * Vault's KV secrets engine actually has 2 versions:
   * KV v1 (without versioning)
   * KV v2 (with versioning)
-* In the second lab challenge, we used the instance of the KV v2 engine that is automatically enabled for "Dev" mode Vault servers.
+* In the second lab challenge, we'll use the instance of the KV v2 engine that is automatically enabled for "Dev" mode Vault servers.
 * Vault does not enable any instances of the KV secrets engine for "Prod" mode servers.
 * So, you'll need to enable it yourself.
 
 ???
-* We already used Vault's Key/Value (KV) engine in the second challenge of the "Vault Basics" Instruqt track that had been automatically enabled for the "Dev" mode server.
-* But we'll need to mount it ourselves for the "Prod" mode server.
+KV v2 includes useful metadata also
 
 ---
 name: vault-kv-commands
