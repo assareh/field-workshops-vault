@@ -187,145 +187,41 @@ All of this builds up the security model, so that we can say that with confidenc
 ---
 name: vault-reference-architecture-2
 # Vault Architecture - High Availability
-.center[![:scale 60%](images/vault-ref-arch-lb.png)]
+.center[![:scale 80%](images/vault-ref-arch-lb.png)]
 .center[[Vault High Availability](https://www.vaultproject.io/docs/concepts/ha/)
 ]
 
 ???
 
-Here we're seeing a depiction of the Vault architecture for high availability. This diagram is for open source Vault and i'll talk a little bit about how this will differ slightly for vault enterprise.
+Here we have an architecture diagram of high availability for Vault open source, and i'll talk a little bit about how this differs for vault enterprise.
 
-76
-00:14:06.630 --> 00:14:17.220
-So we have on the back end here, the console clusters in this instance, I have five console clusters console operates, as I mentioned earlier.
+The Vault servers are using something called the Raft consensus algorithm to achieve a fault-tolerant distributed system, so they'll elect a Leader and the remaining nodes will become followers.
 
-77
-00:14:17.850 --> 00:14:23.220
-we're using something called graphs consensus protocol so they'll elect the LEADER I don't have followers.
+As long as a majority of nodes are online they'll be able to achieve consensus and then they'll be able to accept writes and everything will be great. if we lose any particular node, the cluster is still able to work consistently without any problems because it's still going to have a majority. even if I lose an entire availability zone I'll still have 2 of my 3 nodes. Now if I need to be able to withstand the loss of two nodes, I can add 2 nodes to the cluster making this a 5-node cluster, and then the same principle applies. Even if I lose 2 nodes the cluster will still operate just fine as we'll still have 3 nodes online which is a majority.
 
-78
-00:14:24.000 --> 00:14:31.410
-As long as the majority of nodes are online they'll be able to achieve consensus and then we'll be able to accept rights.
+This makes it very highly available, and there are some other things we do to make it highly performant as well.
 
-79
-00:14:32.400 --> 00:14:46.500
-And everything be great we lose any particular note here console still see is able to work consistently without any problems, because it's still going to have a majority, even if I lose the entire availability zone here also have three of my five minutes.
+On the enterprise side we get an additional feature here, and that's the ability to have non-voting nodes. That means we can add additional nodes to the cluster that do not participate in the consensus but are available as hot standbys in case of a failure, they can immediately promote themselves to voting nodes. and that way we get an even greater level of redundancy, particularly when combined with auto scale groups for recovery.
 
-80
-00:14:48.840 --> 00:14:54.600
-This makes it very highly available, and if the other things we do is make it relatively performance.
+Meaning that I can immediately get something to come in and replace the node that failed where my auto scale group will automatically recognize the failure and replace the failed node.
 
-81
-00:14:56.130 --> 00:15:08.190
-On the enterprise side we get an additional feature here, and one thing to note is if anybody licenses balta enterprise games licenses to sufficient numbers of console enterprise notes or run console.
+From a performance perspective there are diminishing returns to adding more nodes to the consensus. I could have 99 nodes and it would still work but because all of these nodes have connections to all of the others, we get exponentially more connections with each node we add.
 
-82
-00:15:08.910 --> 00:15:15.240
-For vault enterprise, if they want to use and storage so console enterprise has a feature.
+that ultimately causes much more traffic and a degradation of performance in that operations particularly writes will take longer to confirm. there tends to be a sweet spot in the Open Source around five or seven where you get the two node failure redundancy and you still are decently performant.
 
-83
-00:15:15.900 --> 00:15:32.820
-called the availability zone, so we call it get with not will come non voting followers What that means is instead of having these five nodes here's split across three z's I get up six total notes, but only three of them would actually be in the cluster.
+Beyond that usually you're paying way too much in terms of performance penalties in order to get the redundancy you need. With enterprise, you could actually go even smaller to a three node cluster and we'll still have in reality unlimited redundancy because you can do the non-voters the hot standby nodes can come in.
 
-84
-00:15:34.050 --> 00:15:40.500
-The other three, which are the other three that are in each other one and etc that it's not voting well just the basically a hot standby.
+Now in terms of servicing client requests, you can see here we have a single primary which is the leader, and two standbys which are the followers. In open source it's only the primary server that actually does any work at all.
 
-85
-00:15:40.860 --> 00:15:47.160
-waiting for something to happen to the other node in that availability zone and so we'll be able to immediately promote itself to take over.
+All the standbys do is they'll proxy traffic. the nice thing about this is it means your load balancer doesn't necessarily have to be smart enough to know which of the vault servers is the primary to send all the traffic there.
 
-86
-00:15:47.880 --> 00:15:54.420
-And that way we get a similar even greater level of redundancy, particularly when combined with auto scale groups for recovery.
+They can send it to any of these nodes and we'll just seamlessly proxy it on the back end.
 
-87
-00:15:54.840 --> 00:16:05.460
-Meaning that I can immediately get something to come in and saw and replace the know that failed well you know my auto scale group will hopefully eventually recognize and replace.
+In the enterprise we change this slightly. so one of the issues is that well for any writes that occur obviously those have to go through the leader node and then be copied to the followers after they've agreed on that write.
 
-88
-00:16:06.420 --> 00:16:17.130
-And, as well as from a performance perspective there's a diminishing returns and more and more nodes that I have in a console cluster I could have 99 nodes and would still work.
+But it turns out the vast majority of requests into vault are actually reads. If I want to encrypt and decrypt data ultimately that becomes a read against the underlying storage to pull up the encryption key. And then after that it's simply a cpu operation in memory in order to use encryption key and if I will then keep that encryption key in memory after it's loaded so if I have another request I don't even have a read operation generated, which means the performance bottleneck really starts to hit this one Vault server primary.
 
-89
-00:16:18.330 --> 00:16:26.400
-inside of the server cluster but because all of these nodes have connections to all all nodes exponentially more connections with each node we add.
-
-90
-00:16:27.300 --> 00:16:42.060
-And, and ultimately causes much more traffic and a bigger gas station and performance who tends to be a sweet spot in the Open Source around five or seven where you get the two node failure redundancy and you still are decently performance.
-
-91
-00:16:43.320 --> 00:16:49.920
-Beyond that usually you're paying way too much in terms of performance penalties in order to get the redundancy name.
-
-92
-00:16:50.490 --> 00:17:00.390
-With enterprise like said, you can go with even smaller a three node cluster and we'll still have in really unlimited redundancy be because we have these hot standby nodes can come in.
-
-93
-00:17:02.010 --> 00:17:08.820
-The vault server volt clusters work a little bit differently in this instance here, you see a three node cluster.
-
-94
-00:17:10.770 --> 00:17:18.480
-This will have primaries and standbys vault Open Source it's only the primary server that actually does any work at all.
-
-95
-00:17:19.140 --> 00:17:30.030
-The old standbys do is they'll proxy traffic nice thing about this is it means your load balancer doesn't necessarily have to be smart enough to know which is the vault servers the primary allison traffic there.
-
-96
-00:17:30.270 --> 00:17:34.290
-They can send it to any of these notes will just seamlessly proxy it on the back end.
-
-97
-00:17:36.480 --> 00:17:49.680
-We don't need to have a majority of all nodes up I could have 100 nodes of all cluster and 99 of them vote will still be up both decides who the primary is based on who has a lock on the underlying file storage.
-
-98
-00:17:50.700 --> 00:17:54.360
-As long as about one note up and Scott that lock the vaults cluster will be.
-
-99
-00:17:56.490 --> 00:17:57.690
-In the enterprise.
-
-100
-00:17:58.920 --> 00:18:09.780
-We change this slightly to one of the issues is that well for any rights that occur obviously vaults gonna have to send them down the console console is gonna have to copy that across.
-
-101
-00:18:10.350 --> 00:18:15.330
-But the vast majority of workloads that occur and vault are actually really reads.
-
-102
-00:18:16.260 --> 00:18:22.860
-If I want to encrypt and decrypt data ultimately that becomes a read against the underlying system to pull up the encryption key.
-
-103
-00:18:23.670 --> 00:18:30.420
-And then we become after that it's simply a cpu operation in memory.
-
-104
-00:18:30.870 --> 00:18:46.740
-In memory in order to use encryption key and if I will then keep that encryption key and memory after it's loaded So if I have another request I don't even have a regenerated, which means the performance bottleneck really starts to hit this one fault server primary.
-
-105
-00:18:48.210 --> 00:18:49.590
-scaling perspective.
-
-106
-00:18:50.640 --> 00:18:54.330
-i've got all of these other nodes that are just sitting there waiting the takeover.
-
-107
-00:18:56.040 --> 00:19:08.670
-called enterprise support, so we call read only standbys which means for the sites of traffic that can be serviced that are read based traffic which most of the time accessing a secret will be.
-
-108
-00:19:09.330 --> 00:19:23.220
-Those naturally occur against any of the notes and they will service those requests if a right comes in, something that doesn't need to be to go to the primary any of these no's before justice rights over the private so that we have a consistency.
+from a scaling perspective i've got all of these other nodes that are just sitting there waiting the takeover. Vault enterprise supports what we call performance standbys, which are read only standbys, which means for the sites of traffic that can be serviced that are read based traffic, which most of the time accessing a secret will be, those can actually occur against any of the nodes and they will service those requests directly. if a write comes in, something that does need to go to the primary, any of these nodes will forward just those writes writes over to the primary so that we have that consistency.
 
 ---
 name: vault-reference-architecture-3
